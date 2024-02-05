@@ -3,6 +3,7 @@ package com.ApiWiz.Task.Management.Controllers;
 import com.ApiWiz.Task.Management.Entities.Task;
 import com.ApiWiz.Task.Management.Service.Implementation.UserServiceImplementation;
 import com.ApiWiz.Task.Management.Entities.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("user")
+@PreAuthorize("hasRole('USER')")
 public class UserController {
     @Autowired
     private UserServiceImplementation userServiceImplementation;
@@ -31,7 +33,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body("user added successfully"+addedUser.getUserId());
     }
     @PutMapping("/changePassword/{userId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("#userId == authentication.principal.id")
     public ResponseEntity<String> changePassword(@PathVariable Long userId,
                                                  @RequestParam String oldPassword,
                                                  @RequestParam String newPassword) {
@@ -39,19 +41,25 @@ public class UserController {
             String result = userServiceImplementation.changePassword(userId, oldPassword, newPassword);
             log.info("Password changed successfully for user {}", userId);
             return ResponseEntity.status(HttpStatus.OK).body(result);
+        } catch (EntityNotFoundException e) {
+            log.error("Error changing password for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             log.error("Error changing password for user {}: {}", userId, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
     @PutMapping("/changeUsername/{userId}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("#userId == authentication.principal.id")
     public ResponseEntity<String> changeUsername(@PathVariable Long userId,
                                                  @RequestParam String newUsername) {
         try {
             String result = userServiceImplementation.changeUsername(userId, newUsername);
             log.info("Username changed successfully for user {}", userId);
             return ResponseEntity.status(HttpStatus.OK).body(result);
+        } catch (EntityNotFoundException e) {
+            log.error("Error changing username for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             log.error("Error changing username for user {}: {}", userId, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

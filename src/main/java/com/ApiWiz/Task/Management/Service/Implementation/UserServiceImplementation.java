@@ -40,25 +40,29 @@ public class UserServiceImplementation implements UserService {
             User user = optionalUser.get();
             if (user.getPassword().equals(oldPassword)) {
                 user.setPassword(newPassword);
+                userRepository.save(user); // Save the updated user entity to the database
                 log.info("Password changed successfully for user: {}", user);
                 return "Password changed successfully";
             } else {
                 log.warn("Wrong password for user: {}", user);
                 return "Wrong password";
             }
+        } else {
+            throw new EntityNotFoundException("User not found");
         }
-        throw new EntityNotFoundException("User not found");
     }
     @Override
-    public String changeUsername(Long userId, String userName) {
+    public String changeUsername(Long userId, String newUsername) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            user.setUsername(userName);
+            user.setUsername(newUsername); // Update username in the user object
+            userRepository.save(user); // Save the updated user entity to the database
             log.info("Username changed successfully for user: {}", user);
             return "Username changed successfully";
+        } else {
+            throw new EntityNotFoundException("User not found");
         }
-        throw new EntityNotFoundException("User not found");
     }
     @Override
     public String deleteUser(Long userId) {

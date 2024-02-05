@@ -1,5 +1,6 @@
 package com.ApiWiz.Task.Management.Service.Implementation;
 
+import com.ApiWiz.Task.Management.CustomExceptions.TaskNotFoundException;
 import com.ApiWiz.Task.Management.Entities.Task;
 import com.ApiWiz.Task.Management.Entities.TaskDetails;
 import com.ApiWiz.Task.Management.Enums.TaskStatus;
@@ -7,6 +8,7 @@ import com.ApiWiz.Task.Management.Repository.TaskDetailsRepository;
 import com.ApiWiz.Task.Management.Repository.TaskRepository;
 import com.ApiWiz.Task.Management.Repository.UserRepository;
 import com.ApiWiz.Task.Management.Service.TaskService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,9 +85,15 @@ public class TaskServiceImplementation implements TaskService {
     }
     @Override
     public String deleteTask(Long taskId) {
-        taskRepository.deleteById(taskId);
-        log.info("Task deleted successfully.Task ID: {}", taskId);
-        return "successful";
+        Optional<Task> optionalTask = taskRepository.findById(taskId);
+        if (optionalTask.isPresent()) {
+            taskRepository.deleteById(taskId);
+            log.info("Task deleted successfully. Task ID: {}", taskId);
+            return "success";
+        } else {
+            log.error("Task with ID {} not found", taskId);
+            throw new EntityNotFoundException("Task with ID " + taskId + " not found");
+        }
     }
     @Override
     public List<Task> getAllTasks() {

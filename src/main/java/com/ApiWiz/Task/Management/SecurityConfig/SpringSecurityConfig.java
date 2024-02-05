@@ -1,5 +1,6 @@
 package com.ApiWiz.Task.Management.SecurityConfig;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -17,7 +18,6 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SpringSecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
-
     @Bean
     public UserDetailsService userDetailsService() {
         return customUserDetailsService;
